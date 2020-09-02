@@ -1,11 +1,9 @@
-FROM bitnami/magento:2.3.4-debian-10-r65
+FROM bitnami/magento:2.3.5-debian-10-r82
 
 RUN apt update
-RUN apt install -y git
-RUN mkdir /root/.ssh/
-RUN echo "StrictHostKeyChecking no" >> /root/.ssh/config
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+WORKDIR /opt/bitnami/magento/htdocs
+RUN composer config repositories.Buildateam-m2-custom-product-builder vcs https://github.com/Buildateam/m2-custom-product-builder.git
 RUN composer config --global http-basic.repo.magento.com PUBLIC-ACCESS-KEY PRIVATE-ACCESS-KEY
 RUN composer config --global github-oauth.github.com GITHUB-SECRET
-WORKDIR /opt/bitnami/magento/htdocs
-RUN composer config repositories.m2-custom-product-builder git "git@github.com:Buildateam/m2-custom-product-builder.git"
-RUN php -d memory_limit=-1 -f /opt/bitnami/php/bin/composer require buildateam/m2-custom-product-builder:dev-master
+RUN COMPOSER_MEMORY_LIMIT=-1 composer require buildateam/m2-custom-product-builder:dev-master 
